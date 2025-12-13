@@ -57,7 +57,7 @@ const Button = (props) => {
 } 
 
 const TopAnecdote = (props) => {
-
+  
   return(
     <div>
       <h1>Anecdote with most votes</h1>
