@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import Notification from './components/Notification'
 import Filter from './Filter'
 import PersonForm from './PersonForm'
 import Persons from './Person'
+import personService from './services/persons'
+import './index.css'
+
 
 const App = () => {
   
@@ -11,17 +14,37 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
+  const [notification, setNotification] = useState(null)
+  const [notificationType, setNotificationType] = useState(null)
 
+
+  const deletePerson = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)){
+      personService
+        .remove(id)
+        .then(() => {
+          setPersons(persons.filter(p => p.id !== id))
+        })
+        .catch(error => {
+          setNotification(`Information of ${name} has already been removed from server`)
+          setNotificationType('error')
+
+          setTimeout(() => {
+            setNotification(null)
+          }, 3000);
+          setNewName('')
+        })
+    }
+  }
+  
   useEffect(() => {
     console.log("effect")
-    axios
-      .get('http://localhost:3001/persons')
+    personService
+      .getAll()
       .then(response => {
-        console.log('promise fulfilled')
         setPersons(response.data)
       })
   }, [])
-  console.log('render', persons.length, 'persons')
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -37,26 +60,65 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    if (persons.some(person => person.name === newName)){
-      alert(`${newName} is already added to phonebook`)
-    }else if(persons.some(person => person.number === newNumber)){
-      alert(`${newNumber} is already asigned to a person`)
-    }else {
-    const newContact = {name: newName, number: newNumber, id: String(persons.length+1)}
-    setPersons(persons.concat(newContact))
-    setNewName('')
-    setNewNumber('')
-    }
-  }
 
-  const personFiltered = filter
-    ? persons.filter(person => person.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))
-    : persons
+    const existingPerson = persons.find(
+      person => person.name === newName
+    )
+
+    if (existingPerson) {
+      const confirmReplace = window.confirm(
+        `${newName} is already added to phonebook, replace the old number with a new one?`
+      )
+
+      if (confirmReplace) {
+        const updatedPerson = {
+          ...existingPerson,
+          number: newNumber
+        }
+
+        personService
+          .update(existingPerson.id, updatedPerson)
+          .then(response => {
+            setPersons(
+              persons.map(p =>
+                p.id !== existingPerson.id ? p : response.data
+              )
+            )
+            setNewName('')
+            setNewNumber('')
+        })
+
+    }
+
+  } else {
+    const newContact = {
+      name: newName,
+      number: newNumber
+    }
+
+      personService
+      .create(newContact)
+      .then(response => {
+        setPersons(persons.concat(response.data))
+
+        setNotification(`Added ${response.data.name}`)
+        setNotificationType('success')
+
+        setTimeout(() => {
+          setNotification(null)
+        }, 3000);
+        setNewName('')
+        setNewNumber('')
+    })
+
+  }
+}
+
   
   return (
     <div>
       <h2>Phonebook</h2>
-
+      <Notification message={notification} type={notificationType}/>
       <Filter value={filter} onChange={handleFilterChange} />
 
       <h3>Add a new</h3>
@@ -69,7 +131,7 @@ const App = () => {
       />
 
       <h3>Numbers</h3>
-      <Persons persons={persons} filter={filter} />
+      <Persons persons={persons} filter={filter} onDelete={deletePerson} />
     </div>
   )
 }
