@@ -41,8 +41,8 @@ const App = () => {
     console.log("effect")
     personService
       .getAll()
-      .then(response => {
-        setPersons(response.data)
+      .then(persons => {
+        setPersons(persons)
       })
   }, [])
 
@@ -78,10 +78,10 @@ const App = () => {
 
         personService
           .update(existingPerson.id, updatedPerson)
-          .then(response => {
+          .then(updatedPerson => {
             setPersons(
               persons.map(p =>
-                p.id !== existingPerson.id ? p : response.data
+                p.id !== existingPerson.id ? p : updatedPerson
               )
             )
             setNewName('')
@@ -98,10 +98,10 @@ const App = () => {
 
       personService
       .create(newContact)
-      .then(response => {
-        setPersons(persons.concat(response.data))
+      .then(newPerson => {
+        setPersons(persons.concat(newPerson))
 
-        setNotification(`Added ${response.data.name}`)
+        setNotification(`Added ${newPerson.name}`)
         setNotificationType('success')
 
         setTimeout(() => {
