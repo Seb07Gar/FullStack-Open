@@ -38,7 +38,7 @@ const App = () => {
   }
   
   useEffect(() => {
-    console.log("effect")
+    //console.log("effect")
     personService
       .getAll()
       .then(persons => {
@@ -87,6 +87,13 @@ const App = () => {
             setNewName('')
             setNewNumber('')
         })
+        .catch(error => {
+        setNotification(error.response.data.error)
+        setNotificationType('error')
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000);
+    })
 
     }
 
@@ -109,6 +116,13 @@ const App = () => {
         }, 3000);
         setNewName('')
         setNewNumber('')
+    })
+    .catch(error => {
+      setNotification(error.response.data.error)
+      setNotificationType('error')
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000);
     })
 
   }
