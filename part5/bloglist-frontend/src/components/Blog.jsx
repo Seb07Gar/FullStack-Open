@@ -15,8 +15,8 @@ const Blog = ({ blog, likeBlog, deleteBlog, user }) => {
     blog.user && user && blog.user.username === user.username
 
   return (
-    <div style={blogStyle}>
-      <div>
+    <div style={blogStyle} className="blog">
+      <div className="blog-summary">
         {blog.title} {blog.author}
         <button onClick={() => setDetailsVisible(!detailsVisible)}>
           {detailsVisible ? 'hide' : 'view'}
@@ -24,15 +24,15 @@ const Blog = ({ blog, likeBlog, deleteBlog, user }) => {
       </div>
 
       {detailsVisible && (
-        <div>
-          <div>{blog.url}</div>
+        <div className="blog-details">
+          <div className="blog-url">{blog.url}</div>
 
-          <div>
+          <div className="blog-likes">
             likes {blog.likes}
             <button onClick={() => likeBlog(blog)}>like</button>
           </div>
 
-          <div>added by {blog.user?.name}</div>
+          <div className="blog-user">added by {blog.user?.name}</div>
 
           {showDeleteButton && (
             <button onClick={() => deleteBlog(blog.id, blog.title)}>
