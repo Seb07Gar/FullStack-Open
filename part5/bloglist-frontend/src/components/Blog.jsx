@@ -16,7 +16,7 @@ const Blog = ({ blog, likeBlog, deleteBlog, user }) => {
 
   return (
     <div style={blogStyle} className="blog">
-      <div className="blog-summary">
+      <div className="blog-summary" data-testid="blog-title">
         {blog.title} {blog.author}
         <button onClick={() => setDetailsVisible(!detailsVisible)}>
           {detailsVisible ? 'hide' : 'view'}
@@ -28,7 +28,7 @@ const Blog = ({ blog, likeBlog, deleteBlog, user }) => {
           <div className="blog-url">{blog.url}</div>
 
           <div className="blog-likes">
-            likes {blog.likes}
+            likes <span data-testid="likes-count">{blog.likes}</span>
             <button onClick={() => likeBlog(blog)}>like</button>
           </div>
 
