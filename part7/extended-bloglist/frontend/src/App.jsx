@@ -17,6 +17,11 @@ import {
   deleteBlog,
 } from './reducers/blogReducer'
 import { setUser, clearUser } from './reducers/userReducer'
+import { Routes, Route, Link } from 'react-router-dom'
+import Users from './components/Users'
+import User from './components/User'
+import BlogView from './components/BlogView'
+import Navigation from './components/Navigation'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -142,28 +147,42 @@ const App = () => {
 
   return (
     <div>
-      <h2>blogs</h2>
+      <Navigation user={user} handleLogout={handleLogout} />
+
+      <h2>extended blog app</h2>
 
       <Notification />
 
-      <p>
-        {user.name} logged in
-        <button onClick={handleLogout}>logout</button>
-      </p>
+      <Routes>
+        <Route path="/users/:id" element={<User />} />
+        <Route path="/users" element={<Users />} />
 
-      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-        <BlogForm createBlog={addBlog} />
-      </Togglable>
-
-      {blogsSortedByLikes.map((blog) => (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          user={user}
-          likeBlog={handleLike}
-          deleteBlog={handleDelete}
+        <Route
+          path="/blogs/:id"
+          element={
+            <BlogView
+              likeBlog={handleLike}
+              deleteBlog={handleDelete}
+              user={user}
+            />
+          }
         />
-      ))}
+
+        <Route
+          path="/"
+          element={
+            <>
+              <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+                <BlogForm createBlog={addBlog} />
+              </Togglable>
+
+              {blogsSortedByLikes.map((blog) => (
+                <Blog key={blog.id} blog={blog} />
+              ))}
+            </>
+          }
+        />
+      </Routes>
     </div>
   )
 }

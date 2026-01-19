@@ -4,15 +4,11 @@ const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const middleware = require('../utils/middleware')
 
-
 blogsRouter.get('/', async (req, res) => {
-  const blogs = await Blog
-    .find({})
-    .populate('user', { username: 1, name: 1 })
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
 
   res.json(blogs)
 })
-
 
 blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
   const user = request.user
@@ -26,7 +22,7 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
     author: request.body.author,
     url: request.body.url,
     likes: request.body.likes || 0,
-    user: user._id
+    user: user._id,
   })
 
   const savedBlog = await blog.save()
@@ -37,26 +33,28 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
   response.status(201).json(savedBlog)
 })
 
-blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) => {
-  const user = request.user
-  const blog = await Blog.findById(request.params.id)
+blogsRouter.delete(
+  '/:id',
+  middleware.userExtractor,
+  async (request, response) => {
+    const user = request.user
+    const blog = await Blog.findById(request.params.id)
 
-  if (!blog) {
-    return response.status(404).end()
+    if (!blog) {
+      return response.status(404).end()
+    }
+
+    if (blog.user.toString() !== user._id.toString()) {
+      return response.status(403).json({
+        error: 'only the creator can delete this blog',
+      })
+    }
+
+    await Blog.findByIdAndDelete(request.params.id)
+
+    response.status(204).end()
   }
-
-  if (blog.user.toString() !== user._id.toString()) {
-    return response.status(403).json({
-      error: 'only the creator can delete this blog'
-    })
-  }
-
-  await Blog.findByIdAndDelete(request.params.id)
-
-  response.status(204).end()
-})
-
-
+)
 
 blogsRouter.put('/:id', async (request, response) => {
   const { title, author, url, likes, user } = request.body
@@ -66,19 +64,33 @@ blogsRouter.put('/:id', async (request, response) => {
     author,
     url,
     likes,
-    user
+    user,
   }
 
-  const result = await Blog.findByIdAndUpdate(
-    request.params.id,
-    updatedBlog,
-    { new: true }
-  ).populate('user', { username: 1, name: 1 })
+  const result = await Blog.findByIdAndUpdate(request.params.id, updatedBlog, {
+    new: true,
+  }).populate('user', { username: 1, name: 1 })
 
   response.json(result)
 })
 
+blogsRouter.post('/:id/comments', async (request, response) => {
+  const { comment } = request.body
 
+  if (!comment) {
+    return response.status(400).json({ error: 'comment is required' })
+  }
 
+  const blog = await Blog.findById(request.params.id)
+
+  if (!blog) {
+    return response.status(404).end()
+  }
+
+  blog.comments = blog.comments.concat(comment)
+  const updatedBlog = await blog.save()
+
+  response.status(201).json(updatedBlog)
+})
 
 module.exports = blogsRouter
