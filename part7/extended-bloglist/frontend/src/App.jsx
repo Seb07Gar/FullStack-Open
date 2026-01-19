@@ -22,6 +22,7 @@ import Users from './components/Users'
 import User from './components/User'
 import BlogView from './components/BlogView'
 import Navigation from './components/Navigation'
+import { Form, Button } from 'react-bootstrap'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -98,26 +99,38 @@ const App = () => {
   }
 
   const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        <label htmlFor="username">username</label>
-        <input
-          id="username"
+    <Form onSubmit={handleLogin} style={{ color: '#e5e7eb' }}>
+      <Form.Group className="mb-3">
+        <Form.Label>username</Form.Label>
+        <Form.Control
           value={username}
           onChange={({ target }) => setUsername(target.value)}
+          style={{
+            backgroundColor: '#1e293b', // slate-800
+            color: '#e5e7eb',
+            border: '1px solid #334155',
+          }}
         />
-      </div>
-      <div>
-        <label htmlFor="password">password</label>
-        <input
-          id="password"
+      </Form.Group>
+
+      <Form.Group className="mb-3">
+        <Form.Label>password</Form.Label>
+        <Form.Control
           type="password"
           value={password}
           onChange={({ target }) => setPassword(target.value)}
+          style={{
+            backgroundColor: '#1e293b',
+            color: '#e5e7eb',
+            border: '1px solid #334155',
+          }}
         />
-      </div>
-      <button type="submit">login</button>
-    </form>
+      </Form.Group>
+
+      <Button variant="outline-info" type="submit">
+        login
+      </Button>
+    </Form>
   )
 
   const handleLike = (blog) => {
@@ -135,18 +148,36 @@ const App = () => {
 
   if (user === null) {
     return (
-      <div>
+      <div
+        style={{
+          minHeight: '100vh',
+          backgroundColor: '#0f172a',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+          padding: '2rem',
+          color: '#e5e7eb',
+        }}
+      >
         <h2>Log in to application</h2>
 
         <Notification />
 
-        {loginForm()}
+        <div className="mt-3">{loginForm()}</div>
       </div>
     )
   }
 
   return (
-    <div>
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        color: '#e5e7eb',
+        paddingBottom: '2rem',
+      }}
+    >
       <Navigation user={user} handleLogout={handleLogout} />
 
       <h2>extended blog app</h2>
